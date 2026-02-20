@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-5">
+    <div class="p-4 mb-4 text-white rounded-4 shadow"
+     style="background: linear-gradient(90deg,#4e73df,#1cc88a);">
+    <h2 class="fw-bold">Civic Intelligence Dashboard</h2>
+    <p class="mb-0">Real-time civic issue monitoring system</p>
+</div>
+    <form method="GET" class="row g-2 mb-4">
+
+    <div class="col-md-3">
+        <input type="text" name="search"
+               value="{{ search }}"
+               class="form-control"
+               placeholder="Search by title">
+    </div>
+
+    <div class="col-md-3">
+        <select name="category" class="form-select">
+            <option value="">All Categories</option>
+            <option value="Road Damage" {% if category_filter=="Road Damage" %}selected{% endif %}>Road Damage</option>
+            <option value="Garbage" {% if category_filter=="Garbage" %}selected{% endif %}>Garbage</option>
+            <option value="Street Light" {% if category_filter=="Street Light" %}selected{% endif %}>Street Light</option>
+            <option value="Water Leakage" {% if category_filter=="Water Leakage" %}selected{% endif %}>Water Leakage</option>
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <select name="status" class="form-select">
+            <option value="">All Status</option>
+            <option value="Pending" {% if status_filter=="Pending" %}selected{% endif %}>Pending</option>
+            <option value="Resolved" {% if status_filter=="Resolved" %}selected{% endif %}>Resolved</option>
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <button class="btn btn-primary w-100">Apply Filter</button>
+    </div>
+
+</form>
+    
+    <!-- Charts Section -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow p-3">
+                <h5>Issues by Category</h5>
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow p-3">
+                <h5>Status Overview</h5>
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Complaints Table -->
+    <table class="table table-bordered table-hover shadow">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for complaint in complaints %}
+          <tr 
+    {% if complaint["priority"] == "High" and complaint["status"] != "Resolved" %}
+        class="table-danger"
+    {% endif %}
+>
+                <td>{{ complaint["id"] }}</td>
+                <td>{{ complaint["title"] }}</td>
+                <td>{{ complaint["category"] }}</td>
+
+                <!-- Priority Badge -->
+                <td>
+                    {% if complaint["priority"] == "High" %}
+                        <span class="badge bg-danger">High</span>
+                    {% elif complaint["priority"] == "Medium" %}
+                        <span class="badge bg-warning text-dark">Medium</span>
+                    {% else %}
+                        <span class="badge bg-success">Low</span>
+                    {% endif %}
+                </td>
+
+                <!-- Status Badge -->
+                <td>
+                    {% if complaint["status"] == "Resolved" %}
+                        <span class="badge bg-success">Resolved</span>
+                    {% else %}
+                        <span class="badge bg-danger">Pending</span>
+                    {% endif %}
+                </td>
+
+                <!-- Action Button -->
+                <td>
+                    {% if complaint["status"] != "Resolved" %}
+                        <a href="/update/{{ complaint['id'] }}/Resolved"
+                           class="btn btn-sm btn-success">
+                           Resolve
+                        </a>
+                    {% else %}
+                        <span class="text-muted">Done</span>
+                    {% endif %}
+                </td>
+
+                <!--resolve for admin-->
+                <td>
+    {% if session.get('admin') %}
+        {% if complaint["status"] != "Resolved" %}
+            <a href="/update/{{ complaint['id'] }}/Resolved"
+               class="btn btn-sm btn-success">
+               Resolve
+            </a>
+        {% else %}
+            <span class="text-muted">Done</span>
+        {% endif %}
+    {% else %}
+        <span class="text-muted">Admin Only</span>
+    {% endif %}
+</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script id="category-data" type="application/json">
+{{ category_data | tojson }}
+</script>
+
+<script id="status-data" type="application/json">
+{{ status_data | tojson }}
+</script>
+
+<script>
+    const categoryData = JSON.parse(
+        document.getElementById("category-data").textContent
+    );
+
+    const statusData = JSON.parse(
+        document.getElementById("status-data").textContent
+    );
+
+    const categoryLabels = categoryData.map(item => item.category);
+    const categoryCounts = categoryData.map(item => item.count);
+
+    const statusLabels = statusData.map(item => item.status);
+    const statusCounts = statusData.map(item => item.count);
+
+    new Chart(document.getElementById('categoryChart'), {
+        type: 'bar',
+        data: {
+            labels: categoryLabels,
+            datasets: [{
+                label: 'Issues',
+                data: categoryCounts,
+                backgroundColor: ['#4e73df', '#1cc88a', '#f6c23e', '#e74a3b']
+            }]
+        }
+    });
+
+    new Chart(document.getElementById('statusChart'), {
+        type: 'pie',
+        data: {
+            labels: statusLabels,
+            datasets: [{
+                data: statusCounts,
+                backgroundColor: ['#1cc88a', '#e74a3b']
+            }]
+        }
+    });
+</script>
+
+{% endblock %}

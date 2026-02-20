@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="hero text-center">
+    <h1 class="display-4 fw-bold">CivicTrack</h1>
+    <p class="lead">Map It. Track It. Fix It</p>
+    <a href="/report" class="btn btn-light btn-lg mt-3">Report Issue</a>
+</section>
+
+<div class="container mt-5">
+    <div class="row text-center">
+
+        <div class="col-md-4">
+            <div class="card shadow p-4">
+                <h3 class="text-primary">{{ total }}</h3>
+                <p>Total Issues</p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow p-4">
+                <h3 class="text-success">{{ resolved }}</h3>
+                <p>Resolved</p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow p-4">
+                <h3 class="text-danger">{{ pending }}</h3>
+                <p>Pending</p>
+            </div>
+
+            
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

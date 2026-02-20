@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Gradient Header -->
+<section class="text-center text-white py-4"
+    style="background: linear-gradient(90deg,#4e73df,#1cc88a); border-radius: 0 0 25px 25px;">
+    <h2 class="fw-bold">Report a Civic Issue</h2>
+    <p class="mb-0">Help improve your city by reporting problems</p>
+</section>
+
+<div class="container mt-5">
+    <div class="card shadow-lg p-4 border-0 rounded-4">
+
+        <form method="POST">
+
+            <!-- Title -->
+            <input type="text" name="title"
+                class="form-control form-control-lg mb-3 shadow-sm"
+                placeholder="Issue Title"
+                style="border-radius:15px;" required>
+
+            <!-- Description -->
+            <textarea name="description"
+                class="form-control mb-3 shadow-sm"
+                placeholder="Describe the issue..."
+                rows="3"
+                style="border-radius:15px;" required></textarea>
+
+            <!-- Category -->
+            <select name="category"
+                class="form-select mb-3 shadow-sm"
+                style="border-radius:15px;">
+                <option>Road Damage</option>
+                <option>Garbage</option>
+                <option>Street Light</option>
+                <option>Water Leakage</option>
+            </select>
+
+            <!-- Priority -->
+            <select name="priority"
+                class="form-select mb-4 shadow-sm"
+                style="border-radius:15px;">
+                <option>Low</option>
+                <option>Medium</option>
+                <option>High</option>
+            </select>
+
+            <!-- Search Box -->
+            <div class="mb-3">
+                <input type="text" id="placeSearch"
+                    class="form-control shadow-sm"
+                    placeholder="🔍 Search street or place name"
+                    style="border-radius:15px;">
+            </div>
+
+            <!-- Map Section -->
+            <label class="form-label fw-bold text-primary">
+                📍 Select Location on Map
+            </label>
+
+            <div id="reportMap"
+                style="height:400px; border-radius:20px;
+                border:3px solid #4e73df;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.15);"
+                class="mb-4">
+            </div>
+
+            <!-- Hidden Inputs -->
+            <input type="hidden" name="latitude" id="latitude" required>
+            <input type="hidden" name="longitude" id="longitude" required>
+
+            <!-- Submit Button -->
+            <button class="btn btn-lg w-100 text-white fw-bold"
+                style="background: linear-gradient(90deg,#4e73df,#1cc88a);
+                border:none; border-radius:25px;">
+                🚀 Submit Complaint
+            </button>
+
+        </form>
+    </div>
+</div>
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+    var map = L.map('reportMap').setView([15.3173, 75.7139], 7);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    var marker;
+
+    // Click to select location
+    map.on('click', function(e) {
+        var lat = e.latlng.lat;
+        var lng = e.latlng.lng;
+
+        if (marker) {
+            map.removeLayer(marker);
+        }
+
+        marker = L.marker([lat, lng]).addTo(map);
+
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lng;
+    });
+
+    // Search place
+    document.getElementById("placeSearch").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            var query = this.value;
+
+            fetch("https://nominatim.openstreetmap.org/search?format=json&q=" + query)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length > 0) {
+                    var lat = data[0].lat;
+                    var lon = data[0].lon;
+
+                    map.setView([lat, lon], 15);
+
+                    if (marker) {
+                        map.removeLayer(marker);
+                    }
+
+                    marker = L.marker([lat, lon]).addTo(map);
+
+                    document.getElementById('latitude').value = lat;
+                    document.getElementById('longitude').value = lon;
+                } else {
+                    alert("Location not found");
+                }
+            });
+        }
+    });
+</script>
+
+{% endblock %}

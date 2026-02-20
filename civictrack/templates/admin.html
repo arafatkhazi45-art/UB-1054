@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Gradient Top Section -->
+<section class="text-center text-white py-4"
+    style="background: linear-gradient(90deg,#4e73df,#1cc88a);
+           border-radius: 0 0 25px 25px;">
+    <h2 class="fw-bold">🔐 Admin Control Panel</h2>
+    <p class="mb-0">Authorized Access Only</p>
+</section>
+
+<div class="container mt-5" style="max-width:420px;">
+    <div class="card shadow-lg p-4 border-0 rounded-4"
+         style="backdrop-filter: blur(10px);">
+
+        <h4 class="mb-4 text-center fw-bold text-primary">
+            Administrator Login
+        </h4>
+
+        {% if error %}
+            <div class="alert alert-danger text-center">
+                ⚠ {{ error }}
+            </div>
+        {% endif %}
+
+        <form method="POST">
+
+            <!-- Username -->
+            <div class="mb-3">
+                <input type="text" name="username"
+                    class="form-control shadow-sm"
+                    placeholder="👤 Username"
+                    style="border-radius:15px;"
+                    required>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-4">
+                <input type="password" name="password"
+                    class="form-control shadow-sm"
+                    placeholder="🔑 Password"
+                    style="border-radius:15px;"
+                    required>
+            </div>
+
+            <!-- Login Button -->
+            <button class="btn btn-lg w-100 text-white fw-bold"
+                style="background: linear-gradient(90deg,#4e73df,#1cc88a);
+                       border:none;
+                       border-radius:25px;">
+                🚀 Login Securely
+            </button>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}
